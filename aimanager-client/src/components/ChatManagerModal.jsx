@@ -11,6 +11,7 @@ export const ChatManagerModal = ({ content, onClose }) => {
   ]);
   const [inputMessage, setInputMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const [selectedLang, setSelectedLang] = useState("es"); // ---------------------------------------
   const {
     speak,
     startListening,
@@ -18,7 +19,9 @@ export const ChatManagerModal = ({ content, onClose }) => {
     isListening,
     transcript,
     setTranscript,
-  } = useSpeech();
+  } = useSpeech(selectedLang);
+
+  console.log(`use speecha ${selectedLang}`);
 
   //para capturar el texto del micrófono, y se incerta en el campo de texto
   useEffect(() => {
@@ -50,6 +53,7 @@ export const ChatManagerModal = ({ content, onClose }) => {
         date: content.date,
         message: userMsg.text,
         history: historyDto,
+        language: selectedLang,
       });
 
       const managerMsg = {
@@ -85,6 +89,24 @@ export const ChatManagerModal = ({ content, onClose }) => {
             </h2>
             <p className="text-sm text-gray-300">{content.usedStyle}</p>
           </div>
+
+          {/* BOTONES DE SELECCIÓN DE IDIOMAS*/}
+          <div className="flex gap-1 bg-gray-800 p-1 rounded-lg border border-gray-700">
+            {["es", "en", "fr", "de"].map((lang) => (
+              <button
+                key={lang}
+                onClick={() => setSelectedLang(lang)}
+                className={`px-2 py-1 text-xs font-bold rounded uppercase ${
+                  selectedLang === lang
+                    ? "bg-cyan-500 text-black"
+                    : "text-gray-400 hover:text-white"
+                }`}
+              >
+                {lang}
+              </button>
+            ))}
+          </div>
+          {/* BOTONES DE SELECCIÓN DE IDIOMAS*/}
         </div>
 
         {/* Zona de Mensajes */}
@@ -107,7 +129,7 @@ export const ChatManagerModal = ({ content, onClose }) => {
                 {/* Botón de reproducción de voz solo para el Gerente IA */}
                 {msg.sender === "manager" && (
                   <button
-                    onClick={() => speak(msg.text)} // 3. ¡Usarlo así de simple!
+                    onClick={() => speak(msg.text, selectedLang)} // 3. ¡Usarlo así de simple!
                     className="mt-2 text-xs text-cyan-400 hover:text-cyan-300 flex items-center gap-1 bg-gray-900/50 px-2 py-1 rounded border border-cyan-500/20 transition-colors"
                   >
                     🔊 Escuchar

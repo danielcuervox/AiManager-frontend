@@ -1,9 +1,25 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 
-export const useSpeech = () => {
+export const useSpeech = (defaultLang = "es") => {
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState("");
   const recognitionRef = useRef(null);
+
+  const getLocaleCode = (lang) => {
+    const safeLang = typeof lang === "string" ? lang : "es";
+    console.log(`llega un lang >>> ${lang} y ${safeLang}`);
+    switch (safeLang.toLowerCase()) {
+      case "en":
+        return "en-US";
+      case "fr":
+        return "fr-FR";
+      case "de":
+        return "de-DE";
+      case "es":
+      default:
+        return "es-ES";
+    }
+  };
 
   //----------------------------------------------
   // TEXTO A VOZ
@@ -25,7 +41,8 @@ export const useSpeech = () => {
     }
   }, []);
 
-  const speak = useCallback((text) => {
+  // 🔊 SÍNTESIS DE VOZ (TTS)
+  const speak = useCallback((text, lang = defaultLang) => {
     if (!("speechSynthesis" in window)) {
       alert("Tu navegador no soporta la reproducción de voz.");
       return;
@@ -33,27 +50,24 @@ export const useSpeech = () => {
 
     // Detener cualquier reproducción en curso
     window.speechSynthesis.cancel();
-
     if (!text) return;
 
+    const langLocale = getLocaleCode(lang);
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = "es-ES";
+    utterance.lang = langLocale;
     utterance.rate = 0.95; // Ritmo pausado y firme
     utterance.pitch = 0.9; // Tono más grave/masculino
 
     const voices = window.speechSynthesis.getVoices();
+    const langPrefix = langLocale.split("-")[0];
 
     // 1. Prioridad: Buscar voces "Natural" o de "Google" en español
-    let selectedVoice = voices.find(
-      (v) =>
-        v.lang.startsWith("es") &&
-        (v.name.includes("Natural") || v.name.includes("Google")),
-    );
-
-    // 2. Fallback: Buscar cualquier voz en español
-    if (!selectedVoice) {
-      selectedVoice = voices.find((v) => v.lang.startsWith("es"));
-    }
+    let selectedVoice =
+      voices.find(
+        (v) =>
+          v.lang.startsWith(langPrefix) &&
+          (v.name.includes("Natural") || v.name.includes("Google")),
+      ) || voices.find((v) => v.lang.startsWith(langPrefix));
 
     if (selectedVoice) {
       utterance.voice = selectedVoice;
@@ -71,7 +85,7 @@ export const useSpeech = () => {
   //----------------------------------------------
   // TEXTO A VOZ
   //---------------------------------------------
-  useEffect(() => {
+  /* useEffect(() => {
     const SpeechRecognition =
       window.SpeechRecognition || window.webkitSpeechRecognition;
 
@@ -101,26 +115,46 @@ export const useSpeech = () => {
 
       recognitionRef.current = recognition;
     }
-  }, []);
+  }, []); */
 
-  const startListening = useCallback(() => {
-    if (!recognitionRef.current) {
-      alert("Tu navegador no soporta el reconocimiento de voz por micrófono.");
-      return;
-    }
-    setTranscript(""); // Limpiar transcripción anterior
-    try {
-      recognitionRef.current.start();
-    } catch (e) {
-      console.warn("El micrófono ya estaba activo:", e);
-    }
-  }, []);
+  const startListening = useCallback(
+    (lang = defaultLang) => {
+      const SpeechRecognition =
+        window.SpeechRecognition || window.webkitSpeechRecognition;
+
+      if (!SpeechRecognition) {
+        alert("Tu navegador no soporta el micrófono.");
+        return;
+      }
+
+      const recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      recognition.lang = getLocaleCode(lang);
+
+      recognition.onstart = () => setIsListening(true);
+      recognition.onresult = (event) =>
+        setTranscript(event.results[0][0].transcript);
+      recognition.onerror = () => setIsListening(false);
+      recognition.onend = () => setIsListening(false);
+
+      setTranscript("");
+      recognitionRef.current = recognition;
+
+      try {
+        recognition.start();
+      } catch (e) {
+        console.warn("Error al iniciar micrófono:", e);
+      }
+    },
+    [defaultLang],
+  );
 
   const stopListening = useCallback(() => {
     if (recognitionRef.current) {
       recognitionRef.current.stop();
     }
-  }, []);
+  }, [defaultLang]);
 
   return {
     speak,
