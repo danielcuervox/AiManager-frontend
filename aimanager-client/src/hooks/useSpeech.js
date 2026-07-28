@@ -1,12 +1,18 @@
-import { useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 
 export const useSpeech = () => {
-  // Precargar las voces del navegador al montar el hook
+  const [isListening, setIsListening] = useState(false);
+  const [transcript, setTranscript] = useState("");
+  const recognitionRef = useRef(null);
+
+  //----------------------------------------------
+  // TEXTO A VOZ
+  //---------------------------------------------
+  // pregargar voces del navegador al montar el hook
   useEffect(() => {
     if ("speechSynthesis" in window) {
       window.speechSynthesis.getVoices();
 
-      // En algunos navegadores como Chrome, las voces se cargan asíncronamente
       const handleVoicesChanged = () => {
         window.speechSynthesis.getVoices();
       };
@@ -56,13 +62,75 @@ export const useSpeech = () => {
     window.speechSynthesis.speak(utterance);
   }, []);
 
-  const stop = useCallback(() => {
+  const stopSpeaking = useCallback(() => {
     if ("speechSynthesis" in window) {
       window.speechSynthesis.cancel();
     }
   }, []);
 
-  return { speak, stop };
+  //----------------------------------------------
+  // TEXTO A VOZ
+  //---------------------------------------------
+  useEffect(() => {
+    const SpeechRecognition =
+      window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if (SpeechRecognition) {
+      const recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      recognition.lang = "es-ES";
+
+      recognition.onstart = () => {
+        setIsListening(true);
+      };
+
+      recognition.onresult = (event) => {
+        const textResult = event.results[0][0].transcript;
+        setTranscript(textResult);
+      };
+
+      recognition.onerror = (event) => {
+        console.error("Error en el reconocimiento de voz:", event.error);
+        setIsListening(false);
+      };
+
+      recognition.onend = () => {
+        setIsListening(false);
+      };
+
+      recognitionRef.current = recognition;
+    }
+  }, []);
+
+  const startListening = useCallback(() => {
+    if (!recognitionRef.current) {
+      alert("Tu navegador no soporta el reconocimiento de voz por micrófono.");
+      return;
+    }
+    setTranscript(""); // Limpiar transcripción anterior
+    try {
+      recognitionRef.current.start();
+    } catch (e) {
+      console.warn("El micrófono ya estaba activo:", e);
+    }
+  }, []);
+
+  const stopListening = useCallback(() => {
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+    }
+  }, []);
+
+  return {
+    speak,
+    stopSpeaking,
+    startListening,
+    stopListening,
+    isListening,
+    transcript,
+    setTranscript,
+  };
 };
 
 /* const speakText = (text) => {

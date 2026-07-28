@@ -1,7 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import api from "../api/api";
 import { useSpeech } from "../hooks/useSpeech";
-
 
 export const ChatManagerModal = ({ content, onClose }) => {
   const [messages, setMessages] = useState([
@@ -12,7 +11,22 @@ export const ChatManagerModal = ({ content, onClose }) => {
   ]);
   const [inputMessage, setInputMessage] = useState("");
   const [loading, setLoading] = useState(false);
-  const { speak } = useSpeech();
+  const {
+    speak,
+    startListening,
+    stopListening,
+    isListening,
+    transcript,
+    setTranscript,
+  } = useSpeech();
+
+  //para capturar el texto del micrófono, y se incerta en el campo de texto
+  useEffect(() => {
+    if (transcript) {
+      setInputMessage((prev) => (prev ? `${prev} ${transcript}` : transcript));
+      setTranscript(""); // Limpiar para la siguiente captura
+    }
+  }, [transcript, setTranscript]);
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
@@ -109,8 +123,24 @@ export const ChatManagerModal = ({ content, onClose }) => {
           )}
         </div>
 
-        {/* Campo de Entrada de Texto */}
+        {/* Campo de Entrada de Texto y MICRÓFONO */}
         <form onSubmit={handleSendMessage} className="flex gap-2 shrink-0">
+          {/* Botón de Micrófono */}
+
+          <button
+            type="button"
+            onClick={isListening ? stopListening : startListening}
+            className={`px-4 rounded-lg font-bold flex items-center justify-center transition-all ${
+              isListening
+                ? "bg-red-600 animate-pulse text-white shadow-[0_0_15px_rgba(239,68,68,0.7)]"
+                : "bg-gray-700 hover:bg-gray-600 text-cyan-400 border border-cyan-500/30"
+            }`}
+            title={isListening ? "Detener grabación" : "Dictar mensaje por voz"}
+          >
+            {isListening ? "🎙️ Escuchando..." : "🎙️ Dictar"}
+          </button>
+
+          {/* entrada TEXTO*/}
           <input
             type="text"
             placeholder="Escribe tu mensaje a la IA..."
