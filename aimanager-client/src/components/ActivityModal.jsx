@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import api from "../api/api";
+import { useLanguage } from "../context/LanguageContext";
 
 export const ActivityModal = ({ activity, onClose, onRefresh }) => {
   //const [isChecked, setIsChecked] = useState(false);
@@ -70,13 +71,29 @@ export const ActivityModal = ({ activity, onClose, onRefresh }) => {
   useEffect(() => {
     handleGetCategories();
   }, []);
+  const { language } = useLanguage();
+  console.log(`EN ACTIVITY MODAL ${language}`);
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       {/* Aplicamos erp-main-display y border para consistencia */}
       <div className="erp-main-display p-6 rounded-xl shadow-2xl w-full max-w-md border border-cyan-400/20">
         <h2 className="text-2xl font-bold mb-6 text-center text-cyan-400">
-          {activity ? "Editar Actividad" : "Nueva Actividad"}
+          {language === "en"
+            ? activity
+              ? "Edit Activity"
+              : "New Activity"
+            : language === "fr"
+              ? activity
+                ? "Modifier l'activité"
+                : "Nouvelle activité"
+              : language === "de"
+                ? activity
+                  ? "Aktivität bearbeiten"
+                  : "Neue Aktivität"
+                : activity
+                  ? "Editar Actividad"
+                  : "Nueva Actividad"}
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -100,7 +117,15 @@ export const ActivityModal = ({ activity, onClose, onRefresh }) => {
           </div>
 
           <input
-            placeholder="Descripción"
+            placeholder={
+              language === "en"
+                ? "Description"
+                : language === "fr"
+                  ? "Description"
+                  : language === "de"
+                    ? "Beschreibung"
+                    : "Descripción"
+            }
             className="w-full p-3 bg-white border border-gray-300 rounded text-gray-800 placeholder-gray-500"
             value={formData.description}
             onChange={(e) =>
@@ -109,7 +134,15 @@ export const ActivityModal = ({ activity, onClose, onRefresh }) => {
           />
 
           <div className="flex items-center justify-between p-2 border rounded bg-gray-50">
-            <label className="font-bold text-gray-700">Categoría:</label>
+            <label className="font-bold text-gray-700">
+              {language === "en"
+                ? "Category"
+                : language === "fr"
+                  ? "Catégorie"
+                  : language === "de"
+                    ? "Kategorie"
+                    : "Categoría"}
+            </label>
             <select
               className="p-1 border rounded bg-white border-gray-300 text-gray-800"
               value={formData.category}
@@ -118,7 +151,15 @@ export const ActivityModal = ({ activity, onClose, onRefresh }) => {
               }
             >
               {/* Opción por defecto (opcional) */}
-              <option value="">Selecciona una categoría</option>
+              <option value="">
+                {language === "en"
+                  ? "Select a category"
+                  : language === "fr"
+                    ? "Sélectionner une catégorie"
+                    : language === "de"
+                      ? "Kategorie auswählen"
+                      : "Selecciona una categoría"}
+              </option>
 
               {/* Mapeo de la lista dinámica */}
               {listCategories.map((cat) => (
@@ -130,7 +171,15 @@ export const ActivityModal = ({ activity, onClose, onRefresh }) => {
           </div>
 
           <textarea
-            placeholder="Comentario"
+            placeholder={
+              language === "en"
+                ? "Comment"
+                : language === "fr"
+                  ? "Commentaire"
+                  : language === "de"
+                    ? "Kommentar"
+                    : "Comentario"
+            }
             className="w-full p-3 bg-white border border-gray-300 rounded text-gray-800 placeholder-gray-500"
             value={formData.comment}
             onChange={(e) =>
@@ -139,7 +188,15 @@ export const ActivityModal = ({ activity, onClose, onRefresh }) => {
           />
 
           <div className="flex items-center justify-between p-2 border rounded bg-gray-50">
-            <label className="font-bold text-gray-700">Resultado:</label>
+            <label className="font-bold text-gray-700">
+              {language === "en"
+                ? "Result"
+                : language === "fr"
+                  ? "Résultat"
+                  : language === "de"
+                    ? "Ergebnis"
+                    : "Resultado"}
+            </label>
             <select
               className="p-1 border rounded bg-white border-gray-300 text-gray-800"
               value={formData.result}
@@ -156,7 +213,15 @@ export const ActivityModal = ({ activity, onClose, onRefresh }) => {
           </div>
 
           <div className="flex items-center justify-between p-2 border rounded bg-gray-50">
-            <span className="font-bold text-gray-700">¿Cumplido?</span>
+            <span className="font-bold text-gray-700">
+              {language === "en"
+                ? "Completed"
+                : language === "fr"
+                  ? "Terminé"
+                  : language === "de"
+                    ? "Erledigt"
+                    : "Cumplido"}
+            </span>
             <button
               type="button"
               onClick={handleToggle}
@@ -178,13 +243,33 @@ export const ActivityModal = ({ activity, onClose, onRefresh }) => {
               onClick={onClose}
               className="px-4 py-2 border border-gray-300 text-gray-600 rounded hover:bg-gray-100"
             >
-              Cancelar
+              {language === "en"
+                ? "Cancel"
+                : language === "fr"
+                  ? "Annuler"
+                  : language === "de"
+                    ? "Abbrechen"
+                    : "Cancelar"}
             </button>
             <button
               type="submit"
               className="px-4 py-2 bg-cyan-600 text-white rounded hover:bg-cyan-700 font-bold"
             >
-              {activity ? "Guardar Cambios" : "Crear Actividad"}
+              {language === "en"
+                ? activity
+                  ? "Save Changes"
+                  : "Create Activity"
+                : language === "fr"
+                  ? activity
+                    ? "Enregistrer les modifications"
+                    : "Créer une activité"
+                  : language === "de"
+                    ? activity
+                      ? "Änderungen speichern"
+                      : "Aktivität erstellen"
+                    : activity
+                      ? "Guardar Cambios"
+                      : "Crear Actividad"}
             </button>
           </div>
         </form>

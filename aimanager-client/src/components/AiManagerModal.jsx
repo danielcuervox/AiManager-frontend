@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import api from "../api/api";
 import { ResultModal } from "./ResultModal";
+import { useLanguage } from "../context/LanguageContext";
 
 export const AiManagerModal = ({ onClose }) => {
   const [isSetCalendarOpen, setIsSetCalendarOpen] = useState(false);
@@ -13,14 +14,17 @@ export const AiManagerModal = ({ onClose }) => {
   const handleShowCalendar = () => {
     setIsSetCalendarOpen(true);
   };
+  const { language } = useLanguage();
 
   const handleSubmit = async (e) => {
     console.log("se pide el resultado", selectedDate);
     let response;
     try {
-      response = await api.post(
-        `/api/analytics/daily-report?date=${selectedDate}`,
-      );
+      response = await api.post("/api/analytics/daily-report", {
+        date: selectedDate,
+        language: language,
+      });
+      console.log(`idioma solicitado ${language}`);
       setAiResult(response.data);
       setIsAiResultModalOpen(true);
       //console.log("Response from backend:", response.data);
