@@ -116,18 +116,51 @@ export const ChatManagerModal = ({ content, onClose }) => {
           </div>
 
           {/* BOTONES DE SELECCIÓN DE IDIOMAS*/}
-          <div className="flex gap-1 bg-gray-800 p-1 rounded-lg border border-gray-700">
-            {["es", "en", "fr", "de"].map((lang) => (
+          {/* Selector de idiomas con Banderas */}
+          <div className="flex gap-1.5 bg-gray-800 p-1.5 rounded-lg border border-gray-700 justify-end">
+            {[
+              {
+                code: "es",
+                name: "España",
+                flag: "../../public/images/flags/spain_flag.png",
+              },
+              {
+                code: "en",
+                name: "English",
+                flag: "/images/flags/brit_american_flag.png",
+              },
+              {
+                code: "fr",
+                name: "Français",
+                flag: "/images/flags/france_flag.png",
+              },
+              {
+                code: "de",
+                name: "Deutsch",
+                flag: "/images/flags/germany_flag.png",
+              },
+            ].map((item) => (
               <button
-                key={lang}
-                onClick={() => changeLanguage(lang)}
-                className={`px-2 py-1 text-xs font-bold rounded uppercase ${
-                  language === lang
-                    ? "bg-cyan-500 text-black"
-                    : "text-gray-400 hover:text-white"
+                key={item.code}
+                type="button"
+                onClick={() => changeLanguage(item.code)}
+                title={item.name}
+                className={`p-1 rounded transition-all flex items-center justify-center ${
+                  language === item.code
+                    ? "bg-cyan-500 shadow-[0_0_10px_rgba(0,242,254,0.5)] scale-105"
+                    : "opacity-60 hover:opacity-100 hover:bg-gray-700"
                 }`}
               >
-                {lang}
+                <img
+                  src={item.flag}
+                  alt={item.name}
+                  className="w-6 h-4 object-cover rounded-sm shadow-sm"
+                  onError={(e) => {
+                    // Si falla la imagen, muestra el texto como respaldo de emergencia
+                    e.target.style.display = "none";
+                    e.target.parentElement.innerText = item.code.toUpperCase();
+                  }}
+                />
               </button>
             ))}
           </div>

@@ -1,5 +1,6 @@
 import React from "react";
 import api from "../api/api";
+import { useLanguage } from "../context/LanguageContext";
 
 export const DailyTimetable = ({ onEdit, refreshTrigger, onDelete }) => {
   const [listActivities, setListActivities] = React.useState([]);
@@ -33,41 +34,78 @@ export const DailyTimetable = ({ onEdit, refreshTrigger, onDelete }) => {
     handleGetActivities();
   }, [refreshTrigger]);
 
+  const { language } = useLanguage();
+
   return (
     <div className="p-4 erp-main-display rounded-lg">
       <h2 className="text-xl font-bold mb-4 text-center text-cyan-400">
-        Activities for today
+        {language === "en"
+          ? "Activities for today"
+          : language === "fr"
+            ? "Activités d'aujourd'hui"
+            : language === "de"
+              ? "Aktivitäten für heute"
+              : "Actividades para hoy"}
       </h2>
-      <ul className="space-y-2">
+      <ul className="space-y-3">
         {Array.isArray(listActivities) &&
           listActivities.map((act) => (
             <li
               key={act.id}
-              className={`flex items-center justify-between p-2 border rounded shadow-sm ${getColorClass(act.result, act.done)}`}
+              className={`flex flex-col md:flex-row items-start md:items-center justify-between p-3 gap-3 border rounded shadow-sm ${getColorClass(act.result, act.done)}`}
             >
-              {/* Información a la izquierda */}
-              <div className="flex items-center gap-6 font-mono font-bold">
-                <span className="w-16">{act.time}</span> |
-                <span className="w-48 truncate">{act.description}</span>
-                <span className="opacity-70 text-sm">
-                  ({act.category ? act.category.categoryName : "Sin categoría"})
-                </span>{" "}
-                |<span className="text-sm">{act.result}%</span>
+              {/* Información principal */}
+              <div className="flex flex-wrap items-center gap-2 md:gap-4 font-mono font-bold w-full md:w-auto">
+                <span className="w-14 text-sm md:text-base">{act.time}</span>
+                <span className="hidden md:inline">|</span>
+                <span
+                  className="max-w-[200px] md:w-56 truncate text-sm md:text-xl"
+                  title={act.description}
+                >
+                  | {act.description} |
+                </span>
+                <span className="opacity-70 text-xs md:text-sm">
+                  (
+                  {act.category
+                    ? act.category.categoryName
+                    : language === "en"
+                      ? "Uncategorized"
+                      : language === "fr"
+                        ? "Sans catégorie"
+                        : language === "de"
+                          ? "Ohne Kategorie"
+                          : "Sin categoría"}
+                  ) |
+                </span>
+                <span className="hidden md:inline">|</span>
+                <span className="text-xs md:text-sm">{act.result}%</span>
               </div>
 
-              {/* Botones a la derecha */}
-              <div className="flex gap-2">
+              {/* Botones a la derecha / abajo en móvil */}
+              <div className="flex gap-2 w-full md:w-auto justify-end pt-2 md:pt-0 border-t md:border-t-0 border-black/10 dark:border-white/10">
                 <button
                   onClick={() => onEdit(act)}
-                  className="erp-button-small erp-button-light-green px-3"
+                  className="erp-button-small erp-button-light-green px-3 py-1 text-xs md:text-sm"
                 >
-                  Check
+                  {language === "en"
+                    ? "Edit"
+                    : language === "fr"
+                      ? "Modifier"
+                      : language === "de"
+                        ? "Bearbeiten"
+                        : "Editar"}
                 </button>
                 <button
                   onClick={() => onDelete(act.id)}
-                  className="erp-button-small erp-button-red px-3"
+                  className="erp-button-small erp-button-red px-3 py-1 text-xs md:text-sm"
                 >
-                  Delete
+                  {language === "en"
+                    ? "Delete"
+                    : language === "fr"
+                      ? "Supprimer"
+                      : language === "de"
+                        ? "Löschen"
+                        : "Eliminar"}
                 </button>
               </div>
             </li>

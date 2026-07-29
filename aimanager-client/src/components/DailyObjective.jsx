@@ -1,6 +1,7 @@
 import React from "react";
 import { useState } from "react";
 import api from "../api/api";
+import { useLanguage } from "../context/LanguageContext";
 
 export const DailyObjective = ({ onClose, onRefresh }) => {
   const [formDailyData, setFormDailyData] = useState({
@@ -10,6 +11,7 @@ export const DailyObjective = ({ onClose, onRefresh }) => {
   const [isEditing, setIsEditing] = useState(false);
 
   const [listDailyObjectives, setListDailyObjectives] = React.useState([]);
+  const { language } = useLanguage();
 
   const handleGetDailyObjectives = async (e) => {
     try {
@@ -73,7 +75,15 @@ export const DailyObjective = ({ onClose, onRefresh }) => {
 
   const handleDelete = async (dailyGoalId) => {
     if (
-      window.confirm("¿Estás seguro de que quieres eliminar esta actividad?")
+      window.confirm(
+        language === "en"
+          ? "Are you sure you want to delete this activity?"
+          : language === "fr"
+            ? "Êtes-vous sûr de vouloir supprimer cette activité ?"
+            : language === "de"
+              ? "Sind Sie sicher, dass Sie diese Aktivität löschen möchten?"
+              : "¿Estás seguro de que quieres eliminar esta actividad?",
+      )
     ) {
       console.log(
         "Token recuperado de localStorage:",
@@ -104,7 +114,13 @@ export const DailyObjective = ({ onClose, onRefresh }) => {
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="erp-main-display p-6 rounded-xl shadow-2xl w-full max-w-md bg-gray-900 border border-cyan-400">
         <h2 className="text-2xl font-bold mb-6 text-center text-cyan-400">
-          New Daily Goal
+          {language === "en"
+            ? "New Daily Goal"
+            : language === "fr"
+              ? "Nouvel objectif quotidien"
+              : language === "de"
+                ? "Neues tägliches Ziel"
+                : "Nuevo objetivo diario"}
         </h2>
 
         {/* se usa un formulario HTML puro para que el navegador controle el submit */}
@@ -112,7 +128,15 @@ export const DailyObjective = ({ onClose, onRefresh }) => {
           <div className="flex gap-4">
             <input
               type="text"
-              placeholder="Actividad..."
+              placeholder={
+                language === "en"
+                  ? "Activity..."
+                  : language === "fr"
+                    ? "Activité..."
+                    : language === "de"
+                      ? "Aktivität..."
+                      : "Actividad..."
+              }
               className="flex-grow p-3 bg-white text-black rounded"
               value={formDailyData.dailyTargetName}
               onChange={(e) =>
@@ -136,20 +160,42 @@ export const DailyObjective = ({ onClose, onRefresh }) => {
             />
           </div>
           <div className="flex justify-end gap-3 pt-4">
-            <button type="button" onClick={onClose} className="text-white">
-              Cancelar
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 border border-gray-300 text-gray-600 rounded hover:bg-gray-100"
+            >
+              {language === "en"
+                ? "Cancel"
+                : language === "fr"
+                  ? "Annuler"
+                  : language === "de"
+                    ? "Abbrechen"
+                    : "Cancelar"}
             </button>
             <button
               type="submit"
               className="bg-cyan-600 p-2 rounded text-white"
             >
-              Guardar
+              {language === "en"
+                ? "Save"
+                : language === "fr"
+                  ? "Enregistrer"
+                  : language === "de"
+                    ? "Speichern"
+                    : "Guardar"}
             </button>
           </div>
         </form>
 
         <h2 className="text-2xl font-bold mb-6 mt-4 text-center text-cyan-400">
-          All Daily Goals
+          {language === "en"
+            ? "All Daily Goals"
+            : language === "fr"
+              ? "Tous les objectifs quotidiens"
+              : language === "de"
+                ? "Alle täglichen Ziele"
+                : "Todos los objetivos diarios"}
         </h2>
         <ul className="space-y-2">
           {Array.isArray(listDailyObjectives) &&
@@ -170,15 +216,27 @@ export const DailyObjective = ({ onClose, onRefresh }) => {
                 <div className="flex gap-2">
                   <button
                     onClick={() => handleEdit(dayObj.id)}
-                    className="erp-button-small erp-button-light-green px-3"
+                    className="erp-button-small erp-button-light-green px-3 text-xs md:text-sm"
                   >
-                    Edit
+                    {language === "en"
+                      ? "Edit"
+                      : language === "fr"
+                        ? "Modifier"
+                        : language === "de"
+                          ? "Bearbeiten"
+                          : "Editar"}
                   </button>
                   <button
                     onClick={() => handleDelete(dayObj.id)}
-                    className="erp-button-small erp-button-red px-3"
+                    className="erp-button-small erp-button-red px-3 text-xs md:text-sm"
                   >
-                    Delete
+                    {language === "en"
+                      ? "Delete"
+                      : language === "fr"
+                        ? "Supprimer"
+                        : language === "de"
+                          ? "Löschen"
+                          : "Eliminar"}
                   </button>
                 </div>
               </li>

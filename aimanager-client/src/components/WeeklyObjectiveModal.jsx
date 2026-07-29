@@ -1,6 +1,7 @@
 import React from "react";
 import { useState } from "react";
 import api from "../api/api";
+import { useLanguage } from "../context/LanguageContext";
 
 export const WeeklyObjectiveModal = ({ onClose, onRefresh }) => {
   const [formWeeklyData, setFormWeeklyData] = useState({
@@ -108,6 +109,8 @@ export const WeeklyObjectiveModal = ({ onClose, onRefresh }) => {
     setIsEditing(false);
   };
 
+  const { language } = useLanguage();
+
   //con esto carga automátiamente al abrir la ventana
   React.useEffect(() => {
     handleGetWeeklyObjectives();
@@ -117,7 +120,13 @@ export const WeeklyObjectiveModal = ({ onClose, onRefresh }) => {
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="erp-main-display p-6 rounded-xl shadow-2xl w-full max-w-md bg-gray-900 border border-cyan-400">
         <h2 className="text-2xl font-bold mb-6 text-center text-cyan-400">
-          New Weekly Goal
+          {language === "en"
+            ? "New Weekly Goal"
+            : language === "fr"
+              ? "Nouvel objectif hebdomadaire"
+              : language === "de"
+                ? "Neues wöchentliches Ziel"
+                : "Nuevo objetivo semanal"}{" "}
         </h2>
 
         {/* se usa un formulario HTML puro para que el navegador controle el submit */}
@@ -149,20 +158,42 @@ export const WeeklyObjectiveModal = ({ onClose, onRefresh }) => {
             />
           </div>
           <div className="flex justify-end gap-3 pt-4">
-            <button type="button" onClick={onClose} className="text-white">
-              Cancelar
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 border border-gray-300 text-gray-600 rounded hover:bg-gray-100"
+            >
+              {language === "en"
+                ? "Cancel"
+                : language === "fr"
+                  ? "Annuler"
+                  : language === "de"
+                    ? "Abbrechen"
+                    : "Cancelar"}
             </button>
             <button
               type="submit"
               className="bg-cyan-600 p-2 rounded text-white"
             >
-              Guardar
+              {language === "en"
+                ? "Save"
+                : language === "fr"
+                  ? "Enregistrer"
+                  : language === "de"
+                    ? "Speichern"
+                    : "Guardar"}
             </button>
           </div>
         </form>
 
         <h2 className="text-2xl font-bold mb-6 mt-4 text-center text-cyan-400">
-          All Weekly Goals
+          {language === "en"
+            ? "All Weekly Goals"
+            : language === "fr"
+              ? "Tous les objectifs hebdomadaires"
+              : language === "de"
+                ? "Alle wöchentlichen Ziele"
+                : "Todos los objetivos semanales"}
         </h2>
         <ul className="space-y-2">
           {Array.isArray(listWeeklyObjectives) &&
@@ -183,15 +214,27 @@ export const WeeklyObjectiveModal = ({ onClose, onRefresh }) => {
                 <div className="flex gap-2">
                   <button
                     onClick={() => handleEdit(weekObj.id)}
-                    className="erp-button-small erp-button-light-green px-3"
+                    className="erp-button-small erp-button-light-green px-3 text-xs md:text-sm"
                   >
-                    Edit
+                    {language === "en"
+                      ? "Edit"
+                      : language === "fr"
+                        ? "Modifier"
+                        : language === "de"
+                          ? "Bearbeiten"
+                          : "Editar"}
                   </button>
                   <button
                     onClick={() => handleDelete(weekObj.id)}
-                    className="erp-button-small erp-button-red px-3"
+                    className="erp-button-small erp-button-red px-3 text-xs md:text-sm"
                   >
-                    Delete
+                    {language === "en"
+                      ? "Delete"
+                      : language === "fr"
+                        ? "Supprimer"
+                        : language === "de"
+                          ? "Löschen"
+                          : "Eliminar"}
                   </button>
                 </div>
               </li>
