@@ -1,5 +1,6 @@
 import { useState } from "react";
 import api from "../api/api";
+import { useLanguage } from "../context/LanguageContext";
 
 const ActivityLogger = () => {
   const [formData, setFormData] = useState({
@@ -38,6 +39,8 @@ const ActivityLogger = () => {
       `${hour.toString().padStart(2, "0")}:30`,
     );
   }
+
+  const { language } = useLanguage();
 
   return (
     <form

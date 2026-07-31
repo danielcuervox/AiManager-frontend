@@ -1,32 +1,54 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import api from "../api/api";
+import { useLanguage } from "../context/LanguageContext";
 import { useSpeech } from "../hooks/useSpeech";
 
 export const ChatManagerModal = ({ content, onClose }) => {
-  const [messages, setMessages] = useState([
+  const { language, changeLanguage } = useLanguage();
+  /*   const [messages, setMessages] = useState([
     {
       sender: "manager",
       text: `¡Atención! Soy tu comandante (${content.usedStyle}). He revisado tu reporte. ¿Qué observaciones o dudas tienes sobre la jornada?`,
     },
-  ]);
+  ]); */
   const [inputMessage, setInputMessage] = useState("");
   const [loading, setLoading] = useState(false);
-  const {
-    speak,
-    startListening,
-    stopListening,
-    isListening,
-    transcript,
-    setTranscript,
-  } = useSpeech();
+  const [messages, setMessages] = useState([]);
+  const { speak, startListening, stopListening, isListening } = useSpeech();
 
-  //para capturar el texto del micrófono, y se incerta en el campo de texto
+  // 🎙️ Función que maneja lo que ocurre cuando el micrófono capta texto     transcript,
+  //setTranscript,
+
   useEffect(() => {
-    if (transcript) {
-      setInputMessage((prev) => (prev ? `${prev} ${transcript}` : transcript));
-      setTranscript(""); // Limpiar para la siguiente captura
+    const welcomeText =
+      language === "en"
+        ? `Attention! I am your commander (${content.usedStyle}). I have reviewed your report. What observations or questions do you have about the workday?`
+        : language === "fr"
+          ? `Attention ! Je suis votre commandant (${content.usedStyle}). J'ai examiné votre rapport. Quelles observations ou questions avez-vous concernant la journée ?`
+          : language === "de"
+            ? `Achtung! Ich bin dein Kommandant (${content.usedStyle}). Ich habe deinen Bericht überprüft. Welche Beobachtungen oder Fragen hast du zum Arbeitstag?`
+            : `¡Atención! Soy tu comandante (${content.usedStyle}). He revisado tu reporte. ¿Qué observaciones o dudas tienes sobre la jornada?`;
+
+    setMessages((prev) => {
+      if (prev.length <= 1) {
+        return [{ sender: "manager", text: welcomeText }];
+      }
+      return prev;
+    });
+  }, [language, content.usedStyle]);
+
+  const handleToggleListen = () => {
+    if (isListening) {
+      stopListening();
+    } else {
+      // Pasamos una función callback limpia para actualizar el input sin useEffects
+      startListening((textResult) => {
+        setInputMessage((prev) =>
+          prev ? `${prev} ${textResult}` : textResult,
+        );
+      });
     }
-  }, [transcript, setTranscript]);
+  };
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
@@ -50,6 +72,7 @@ export const ChatManagerModal = ({ content, onClose }) => {
         date: content.date,
         message: userMsg.text,
         history: historyDto,
+        language: language,
       });
 
       const managerMsg = {
@@ -81,10 +104,67 @@ export const ChatManagerModal = ({ content, onClose }) => {
           />
           <div>
             <h2 className="text-xl font-bold text-cyan-400">
-              Canal Táctico - Gerente IA
+              {language === "en"
+                ? "Tactical Channel - AI Manager"
+                : language === "fr"
+                  ? "Canal Tactique - Gestionnaire IA"
+                  : language === "de"
+                    ? "Taktischer Kanal - KI-Manager"
+                    : "Canal Táctico - Gerente IA"}
             </h2>
             <p className="text-sm text-gray-300">{content.usedStyle}</p>
           </div>
+
+          {/* BOTONES DE SELECCIÓN DE IDIOMAS*/}
+          {/* Selector de idiomas con Banderas */}
+          <div className="flex gap-1.5 bg-gray-800 p-1.5 rounded-lg border border-gray-700 justify-end">
+            {[
+              {
+                code: "es",
+                name: "España",
+                flag: "../../public/images/flags/spain_flag.png",
+              },
+              {
+                code: "en",
+                name: "English",
+                flag: "/images/flags/brit_american_flag.png",
+              },
+              {
+                code: "fr",
+                name: "Français",
+                flag: "/images/flags/france_flag.png",
+              },
+              {
+                code: "de",
+                name: "Deutsch",
+                flag: "/images/flags/germany_flag.png",
+              },
+            ].map((item) => (
+              <button
+                key={item.code}
+                type="button"
+                onClick={() => changeLanguage(item.code)}
+                title={item.name}
+                className={`p-1 rounded transition-all flex items-center justify-center ${
+                  language === item.code
+                    ? "bg-cyan-500 shadow-[0_0_10px_rgba(0,242,254,0.5)] scale-105"
+                    : "opacity-60 hover:opacity-100 hover:bg-gray-700"
+                }`}
+              >
+                <img
+                  src={item.flag}
+                  alt={item.name}
+                  className="w-6 h-4 object-cover rounded-sm shadow-sm"
+                  onError={(e) => {
+                    // Si falla la imagen, muestra el texto como respaldo de emergencia
+                    e.target.style.display = "none";
+                    e.target.parentElement.innerText = item.code.toUpperCase();
+                  }}
+                />
+              </button>
+            ))}
+          </div>
+          {/* BOTONES DE SELECCIÓN DE IDIOMAS*/}
         </div>
 
         {/* Zona de Mensajes */}
@@ -107,10 +187,18 @@ export const ChatManagerModal = ({ content, onClose }) => {
                 {/* Botón de reproducción de voz solo para el Gerente IA */}
                 {msg.sender === "manager" && (
                   <button
-                    onClick={() => speak(msg.text)} // 3. ¡Usarlo así de simple!
-                    className="mt-2 text-xs text-cyan-400 hover:text-cyan-300 flex items-center gap-1 bg-gray-900/50 px-2 py-1 rounded border border-cyan-500/20 transition-colors"
+                    type="button"
+                    onClick={() => speak(msg.text)}
+                    className="mt-3 flex items-center gap-1 text-xs font-semibold text-cyan-400 hover:text-cyan-300 bg-gray-900/60 px-2 py-1 rounded border border-cyan-500/30 transition-colors"
                   >
-                    🔊 Escuchar
+                    🔊{" "}
+                    {language === "en"
+                      ? "Listen"
+                      : language === "fr"
+                        ? "Écouter"
+                        : language === "de"
+                          ? "Anhören"
+                          : "Escuchar"}
                   </button>
                 )}
               </div>
@@ -129,21 +217,59 @@ export const ChatManagerModal = ({ content, onClose }) => {
 
           <button
             type="button"
-            onClick={isListening ? stopListening : startListening}
+            onClick={handleToggleListen}
             className={`px-4 rounded-lg font-bold flex items-center justify-center transition-all ${
               isListening
                 ? "bg-red-600 animate-pulse text-white shadow-[0_0_15px_rgba(239,68,68,0.7)]"
                 : "bg-gray-700 hover:bg-gray-600 text-cyan-400 border border-cyan-500/30"
             }`}
-            title={isListening ? "Detener grabación" : "Dictar mensaje por voz"}
+            title={
+              isListening
+                ? language === "en"
+                  ? "Stop recording"
+                  : language === "fr"
+                    ? "Arrêter l'enregistrement"
+                    : language === "de"
+                      ? "Aufnahme stoppen"
+                      : "Detener grabación"
+                : language === "en"
+                  ? "Dictate message by voice"
+                  : language === "fr"
+                    ? "Dicter un message par la voix"
+                    : language === "de"
+                      ? "Nachricht per Sprache diktieren"
+                      : "Dictar mensaje por voz"
+            }
           >
-            {isListening ? "🎙️ Escuchando..." : "🎙️ Dictar"}
+            {isListening
+              ? language === "en"
+                ? "🎙️ Listening..."
+                : language === "fr"
+                  ? "🎙️ Écoute..."
+                  : language === "de"
+                    ? "🎙️ Höre zu..."
+                    : "🎙️ Escuchando..."
+              : language === "en"
+                ? "🎙️ Dictate"
+                : language === "fr"
+                  ? "🎙️ Dicter"
+                  : language === "de"
+                    ? "🎙️ Diktieren"
+                    : "🎙️ Dictar"}
           </button>
 
           {/* entrada TEXTO*/}
           <input
             type="text"
-            placeholder="Escribe tu mensaje a la IA..."
+            placeholder={
+              language === "en"
+                ? "Type your message to the AI..."
+                : language === "fr"
+                  ? "Tapez votre message à l'IA..."
+                  : language === "de"
+                    ? "Schreibe deine Nachricht an die KI..."
+                    : "Escribe tu mensaje a la IA..."
+            }
             className="flex-1 p-3 bg-gray-800 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-cyan-400"
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
@@ -153,14 +279,26 @@ export const ChatManagerModal = ({ content, onClose }) => {
             disabled={loading}
             className="px-6 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-lg transition-colors"
           >
-            Enviar
+            {language === "en"
+              ? "Send"
+              : language === "fr"
+                ? "Envoyer"
+                : language === "de"
+                  ? "Senden"
+                  : "Enviar"}
           </button>
           <button
             type="button"
             onClick={onClose}
             className="px-4 bg-gray-700 hover:bg-gray-600 text-white rounded-lg"
           >
-            Cerrar
+            {language === "en"
+              ? "Close"
+              : language === "fr"
+                ? "Fermer"
+                : language === "de"
+                  ? "Schließen"
+                  : "Cerrar"}
           </button>
         </form>
       </div>

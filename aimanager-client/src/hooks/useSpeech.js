@@ -1,9 +1,27 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { useLanguage } from "../context/LanguageContext";
 
 export const useSpeech = () => {
+  const { language: globalLang } = useLanguage();
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState("");
   const recognitionRef = useRef(null);
+
+  const getLocaleCode = (lang) => {
+    const safeLang = typeof lang === "string" ? lang : globalLang;
+
+    switch (safeLang.toLowerCase()) {
+      case "en":
+        return "en-US";
+      case "fr":
+        return "fr-FR";
+      case "de":
+        return "de-DE";
+      case "es":
+      default:
+        return "es-ES";
+    }
+  };
 
   //----------------------------------------------
   // TEXTO A VOZ
@@ -25,42 +43,43 @@ export const useSpeech = () => {
     }
   }, []);
 
-  const speak = useCallback((text) => {
-    if (!("speechSynthesis" in window)) {
-      alert("Tu navegador no soporta la reproducción de voz.");
-      return;
-    }
+  // 🔊 SÍNTESIS DE VOZ (TTS)
+  const speak = useCallback(
+    (text, lang = globalLang) => {
+      if (!("speechSynthesis" in window)) {
+        alert("Tu navegador no soporta la reproducción de voz.");
+        return;
+      }
 
-    // Detener cualquier reproducción en curso
-    window.speechSynthesis.cancel();
+      // Detener cualquier reproducción en curso
+      window.speechSynthesis.cancel();
+      if (!text) return;
 
-    if (!text) return;
+      const langLocale = getLocaleCode(lang);
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = langLocale;
+      utterance.rate = 0.95; // Ritmo pausado y firme
+      utterance.pitch = 0.9; // Tono más grave/masculino
 
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = "es-ES";
-    utterance.rate = 0.95; // Ritmo pausado y firme
-    utterance.pitch = 0.9; // Tono más grave/masculino
+      const voices = window.speechSynthesis.getVoices();
+      const langPrefix = langLocale.split("-")[0];
 
-    const voices = window.speechSynthesis.getVoices();
+      // 1. Prioridad: Buscar voces "Natural" o de "Google" en español
+      let selectedVoice =
+        voices.find(
+          (v) =>
+            v.lang.startsWith(langPrefix) &&
+            (v.name.includes("Natural") || v.name.includes("Google")),
+        ) || voices.find((v) => v.lang.startsWith(langPrefix));
 
-    // 1. Prioridad: Buscar voces "Natural" o de "Google" en español
-    let selectedVoice = voices.find(
-      (v) =>
-        v.lang.startsWith("es") &&
-        (v.name.includes("Natural") || v.name.includes("Google")),
-    );
+      if (selectedVoice) {
+        utterance.voice = selectedVoice;
+      }
 
-    // 2. Fallback: Buscar cualquier voz en español
-    if (!selectedVoice) {
-      selectedVoice = voices.find((v) => v.lang.startsWith("es"));
-    }
-
-    if (selectedVoice) {
-      utterance.voice = selectedVoice;
-    }
-
-    window.speechSynthesis.speak(utterance);
-  }, []);
+      window.speechSynthesis.speak(utterance);
+    },
+    [globalLang],
+  );
 
   const stopSpeaking = useCallback(() => {
     if ("speechSynthesis" in window) {
@@ -68,59 +87,51 @@ export const useSpeech = () => {
     }
   }, []);
 
-  //----------------------------------------------
-  // TEXTO A VOZ
-  //---------------------------------------------
-  useEffect(() => {
-    const SpeechRecognition =
-      window.SpeechRecognition || window.webkitSpeechRecognition;
+  const startListening = useCallback(
+    (onSpeechResult, lang = globalLang) => {
+      const SpeechRecognition =
+        window.SpeechRecognition || window.webkitSpeechRecognition;
 
-    if (SpeechRecognition) {
+      if (!SpeechRecognition) {
+        alert("Tu navegador no soporta el micrófono.");
+        return;
+      }
+
       const recognition = new SpeechRecognition();
       recognition.continuous = false;
       recognition.interimResults = false;
-      recognition.lang = "es-ES";
+      recognition.lang = getLocaleCode(lang);
 
-      recognition.onstart = () => {
-        setIsListening(true);
-      };
-
+      recognition.onstart = () => setIsListening(true);
       recognition.onresult = (event) => {
         const textResult = event.results[0][0].transcript;
         setTranscript(textResult);
+
+        if (onSpeechResult) {
+          onSpeechResult(textResult);
+        }
       };
 
-      recognition.onerror = (event) => {
-        console.error("Error en el reconocimiento de voz:", event.error);
-        setIsListening(false);
-      };
+      recognition.onerror = () => setIsListening(false);
+      recognition.onend = () => setIsListening(false);
 
-      recognition.onend = () => {
-        setIsListening(false);
-      };
-
+      setTranscript("");
       recognitionRef.current = recognition;
-    }
-  }, []);
 
-  const startListening = useCallback(() => {
-    if (!recognitionRef.current) {
-      alert("Tu navegador no soporta el reconocimiento de voz por micrófono.");
-      return;
-    }
-    setTranscript(""); // Limpiar transcripción anterior
-    try {
-      recognitionRef.current.start();
-    } catch (e) {
-      console.warn("El micrófono ya estaba activo:", e);
-    }
-  }, []);
+      try {
+        recognition.start();
+      } catch (e) {
+        console.warn("Error al iniciar micrófono:", e);
+      }
+    },
+    [globalLang],
+  );
 
   const stopListening = useCallback(() => {
     if (recognitionRef.current) {
       recognitionRef.current.stop();
     }
-  }, []);
+  }, [globalLang]);
 
   return {
     speak,
@@ -132,51 +143,3 @@ export const useSpeech = () => {
     setTranscript,
   };
 };
-
-/* const speakText = (text) => {
-    if (!("speechSynthesis" in window)) {
-      alert("Tu navegador no soporta la reproducción de voz.");
-      return;
-    }
-
-    window.speechSynthesis.cancel();
-
-    const utterance = new SpeechSynthesisUtterance(text);
-
-    utterance.lang = "es-ES";
-    utterance.rate = 0.95;
-    utterance.pitch = 0.9;
-
-    const voices = window.speechSynthesis.getVoices();
-
-    const spanishVoice =
-      voices.find(
-        (v) => v.lang.startsWith("es") && v.name.toLowerCase().includes("male"),
-      ) || voices.find((v) => v.lang.startsWith("es"));
-
-    if (spanishVoice) {
-      utterance.voice = spanishVoice;
-    }
-
-    window.speechSynthesis.speak(utterance);
-
-    // Buscar voces "Naturales" de Microsoft o voces "Google"
-    /*  let selectedVoice = voices.find(
-      (v) =>
-        v.lang.startsWith("es") &&
-        (v.name.includes("Natural") || v.name.includes("Google")),
-    );
-
-    // 2. Si no encuentra las avanzadas, buscar cualquier voz en español (fallback)
-    if (!selectedVoice) {
-      selectedVoice = voices.find((v) => v.lang.startsWith("es"));
-    }
-
-    // 3. Asignar la voz si la encontró y reproducir
-    if (selectedVoice) {
-      utterance.voice = selectedVoice;
-    }
-
-    window.speechSynthesis.speak(utterance); 
-  }; 
-  */

@@ -4,21 +4,24 @@ import { Register } from "./pages/Register";
 //
 import { Activities } from "./pages/Activities";
 import "./App.css";
+import { LanguageProvider } from "./context/LanguageContext";
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+    <LanguageProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
 
-        {/* si no está logueado */}
-        <Route path="/" element={<Navigate to="/login" />} />
+          {/* si no está logueado */}
+          <Route path="/" element={<Navigate to="/login" />} />
 
-        {/* panel principal */}
-        <Route path="/activities" element={<Activities />} />
-      </Routes>
-    </BrowserRouter>
+          {/* panel principal */}
+          <Route path="/activities" element={<Activities />} />
+        </Routes>
+      </BrowserRouter>
+    </LanguageProvider>
   );
 }
 
