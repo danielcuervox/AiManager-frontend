@@ -103,7 +103,7 @@ export const Activities = () => {
                 {
                   code: "es",
                   name: "España",
-                  flag: "../../public/images/flags/spain_flag.png",
+                  flag: "/images/flags/spain_flag.png",
                 },
                 {
                   code: "en",
