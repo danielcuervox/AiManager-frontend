@@ -1,6 +1,7 @@
 import { useState } from "react";
 import reactLogo from "../assets/react.svg";
 import { useLanguage } from "../context/LanguageContext";
+import api from "../api/api";
 
 import ActivityLogger from "../components/ActivityLogger";
 import { DailyTimetable } from "../components/DailyTimetable";
