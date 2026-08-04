@@ -6,6 +6,7 @@ import { Activities } from "./pages/Activities";
 import "./App.css";
 import { LanguageProvider } from "./context/LanguageContext";
 import { GoogleOAuthProvider } from "@react-oauth/google";
+import { Shop } from "./components/Shop";
 
 function App() {
   return (
@@ -21,6 +22,8 @@ function App() {
 
             {/* panel principal */}
             <Route path="/activities" element={<Activities />} />
+            {/* Ruta para la tienda */}
+            <Route path="/shop" element={<Shop />} />
           </Routes>
         </BrowserRouter>
       </LanguageProvider>

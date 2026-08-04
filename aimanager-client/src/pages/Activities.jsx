@@ -10,7 +10,7 @@ import { WeeklyObjectiveModal } from "../components/WeeklyObjectiveModal";
 import { DailyObjective } from "../components/DailyObjective";
 import { NewCategoryModal } from "../components/NewCategoryModal";
 import { AiManagerModal } from "../components/AiManagerModal";
-//import api from ".";
+import { UserProfile } from "../components/UserProfile";
 
 export const Activities = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -65,6 +65,10 @@ export const Activities = () => {
     }
   };
 
+  const handleOpenShop = () => {
+    window.open("/Shop", "_blank");
+  };
+
   const handleGetAiManager = async () => {
     setIsAiManagerOpen(true);
   };
@@ -87,6 +91,7 @@ export const Activities = () => {
                   ? "Produktivitätsmanager"
                   : "Gestor de Productividad"}
           </h1>
+
           <img
             src={reactLogo}
             alt="React Logo"
@@ -96,55 +101,58 @@ export const Activities = () => {
         <div className="container mx-auto p-4">
           {/* div contendor de los dos botones */}
           <section className="p-6 mb-8 bg-slate-900/60 rounded-xl erp-action-panel shadow-md flex flex-col gap-4">
-            {/* Fila superior: Selector de idiomas alineado a la derecha */}
-            {/* Selector de idiomas con Banderas */}
-            <div className="flex gap-1.5 bg-gray-800 p-1.5 rounded-lg border border-gray-700 justify-end">
-              {[
-                {
-                  code: "es",
-                  name: "España",
-                  flag: "/images/flags/spain_flag.png",
-                },
-                {
-                  code: "en",
-                  name: "English",
-                  flag: "/images/flags/brit_american_flag.png",
-                },
-                {
-                  code: "fr",
-                  name: "Français",
-                  flag: "/images/flags/france_flag.png",
-                },
-                {
-                  code: "de",
-                  name: "Deutsch",
-                  flag: "/images/flags/germany_flag.png",
-                },
-              ].map((item) => (
-                <button
-                  key={item.code}
-                  type="button"
-                  onClick={() => changeLanguage(item.code)}
-                  title={item.name}
-                  className={`p-1 rounded transition-all flex items-center justify-center ${
-                    language === item.code
-                      ? "bg-cyan-500 shadow-[0_0_10px_rgba(0,242,254,0.5)] scale-105"
-                      : "opacity-60 hover:opacity-100 hover:bg-gray-700"
-                  }`}
-                >
-                  <img
-                    src={item.flag}
-                    alt={item.name}
-                    className="w-6 h-4 object-cover rounded-sm shadow-sm"
-                    onError={(e) => {
-                      // Si falla la imagen, muestra el texto como respaldo de emergencia
-                      e.target.style.display = "none";
-                      e.target.parentElement.innerText =
-                        item.code.toUpperCase();
-                    }}
-                  />
-                </button>
-              ))}
+            {/* Fila superior: avatar a la izquierda - Selector de idiomas alineado a la derecha */}
+            <div className="flex flex-wrap items-center justify-between gap-4 bg-gray-800 p-2 rounded-lg border border-gray-700">
+              <UserProfile />
+              {/* Selector de idiomas con Banderas */}
+              <div className="flex gap-1.5 items-center">
+                {[
+                  {
+                    code: "es",
+                    name: "España",
+                    flag: "/images/flags/spain_flag.png",
+                  },
+                  {
+                    code: "en",
+                    name: "English",
+                    flag: "/images/flags/brit_american_flag.png",
+                  },
+                  {
+                    code: "fr",
+                    name: "Français",
+                    flag: "/images/flags/france_flag.png",
+                  },
+                  {
+                    code: "de",
+                    name: "Deutsch",
+                    flag: "/images/flags/germany_flag.png",
+                  },
+                ].map((item) => (
+                  <button
+                    key={item.code}
+                    type="button"
+                    onClick={() => changeLanguage(item.code)}
+                    title={item.name}
+                    className={`p-1 rounded transition-all flex items-center justify-center ${
+                      language === item.code
+                        ? "bg-cyan-500 shadow-[0_0_10px_rgba(0,242,254,0.5)] scale-105"
+                        : "opacity-60 hover:opacity-100 hover:bg-gray-700"
+                    }`}
+                  >
+                    <img
+                      src={item.flag}
+                      alt={item.name}
+                      className="w-6 h-4 object-cover rounded-sm shadow-sm"
+                      onError={(e) => {
+                        // Si falla la imagen, muestra el texto como respaldo de emergencia
+                        e.target.style.display = "none";
+                        e.target.parentElement.innerText =
+                          item.code.toUpperCase();
+                      }}
+                    />
+                  </button>
+                ))}
+              </div>
             </div>
             {/* Fila inferior: Contenedor de los botones principales */}
             <div className="flex flex-wrap gap-4 justify-center">
@@ -216,6 +224,24 @@ export const Activities = () => {
                       : language === "de"
                         ? "KI-Manager holen"
                         : "Obtener Gerente IA"}
+                </span>
+              </button>
+
+              {/*
+              PARA LA TIENDA
+              */}
+              <button
+                onClick={handleOpenShop}
+                className="erp-button erp-button-cyan"
+              >
+                <span>
+                  {language === "en"
+                    ? "Open Shop"
+                    : language === "fr"
+                      ? "Ouvrir la boutique"
+                      : language === "de"
+                        ? "Shop öffnen"
+                        : "Abrir Tienda"}
                 </span>
               </button>
             </div>
