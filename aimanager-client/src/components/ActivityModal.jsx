@@ -72,11 +72,10 @@ export const ActivityModal = ({ activity, onClose, onRefresh }) => {
     handleGetCategories();
   }, []);
   const { language } = useLanguage();
-  console.log(`EN ACTIVITY MODAL ${language}`);
+
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      {/* Aplicamos erp-main-display y border para consistencia */}
       <div className="erp-main-display p-6 rounded-xl shadow-2xl w-full max-w-md border border-cyan-400/20">
         <h2 className="text-2xl font-bold mb-6 text-center text-cyan-400">
           {language === "en"
@@ -150,7 +149,7 @@ export const ActivityModal = ({ activity, onClose, onRefresh }) => {
                 setFormData({ ...formData, category: e.target.value })
               }
             >
-              {/* Opción por defecto (opcional) */}
+              {/* Opción por defecto : OPCIONAL */}
               <option value="">
                 {language === "en"
                   ? "Select a category"

@@ -2,6 +2,7 @@ import { useState } from "react";
 import reactLogo from "../assets/react.svg";
 import { useLanguage } from "../context/LanguageContext";
 import api from "../api/api";
+import { useNavigate } from "react-router-dom";
 
 import ActivityLogger from "../components/ActivityLogger";
 import { DailyTimetable } from "../components/DailyTimetable";
@@ -24,6 +25,7 @@ export const Activities = () => {
 
   // --- AÑADE ESTA FUNCIÓN ---
   const handleRefresh = () => setRefreshTrigger((prev) => prev + 1);
+  const navigate = useNavigate();
 
   const handleEdit = (activity) => {
     setEditingActivity(activity);
@@ -66,7 +68,8 @@ export const Activities = () => {
   };
 
   const handleOpenShop = () => {
-    window.open("/Shop", "_blank");
+    //window.open("/Shop", "_blank");
+    navigate("/Shop");
   };
 
   const handleGetAiManager = async () => {
@@ -103,7 +106,7 @@ export const Activities = () => {
           <section className="p-6 mb-8 bg-slate-900/60 rounded-xl erp-action-panel shadow-md flex flex-col gap-4">
             {/* Fila superior: avatar a la izquierda - Selector de idiomas alineado a la derecha */}
             <div className="flex flex-wrap items-center justify-between gap-4 bg-gray-800 p-2 rounded-lg border border-gray-700">
-              <UserProfile />
+              <UserProfile refreshTrigger={refreshTrigger} />
               {/* Selector de idiomas con Banderas */}
               <div className="flex gap-1.5 items-center">
                 {[
