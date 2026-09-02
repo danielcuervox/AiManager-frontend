@@ -60,6 +60,19 @@ body {
   transition: all 0.2s;
 }
 
+.erp-button-normal {
+  position: relative;
+  letter-spacing: 0.1em;
+  padding: 4px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  border: 2px solid rgba(0, 0, 0, 0.4);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    0 4px 6px rgba(0, 0, 0, 0.3);
+  transition: all 0.2s;
+}
+
 .erp-button-small {
   position: relative;
   font-weight: bold;

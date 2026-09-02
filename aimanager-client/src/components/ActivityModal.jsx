@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import api from "../api/api";
 import { useLanguage } from "../context/LanguageContext";
+import { NewCategoryModal } from "../components/NewCategoryModal";
 
 export const ActivityModal = ({ activity, onClose, onRefresh }) => {
   //const [isChecked, setIsChecked] = useState(false);
@@ -17,6 +18,7 @@ export const ActivityModal = ({ activity, onClose, onRefresh }) => {
   });
 
   const [listCategories, setListCategories] = useState([]);
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
 
   useEffect(() => {
     // Si recibimos una actividad por props, cargamos sus datos en el formulario y se extrae el ID de la categoría
@@ -31,6 +33,11 @@ export const ActivityModal = ({ activity, onClose, onRefresh }) => {
   const handleToggle = () => {
     const newState = !formData.done;
     setFormData({ ...formData, done: newState });
+  };
+
+  const handleCategoryModalClose = () => {
+    setIsCategoryModalOpen(false);
+    handleGetCategories();
   };
 
   const handleSubmit = async (e) => {
@@ -68,11 +75,15 @@ export const ActivityModal = ({ activity, onClose, onRefresh }) => {
     }
   };
 
+  const handleAddCategory = () => {
+    console.log("Abrir modal de nueva categoría");
+    setIsCategoryModalOpen(true);
+  };
+
   useEffect(() => {
     handleGetCategories();
   }, []);
   const { language } = useLanguage();
-
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -132,8 +143,9 @@ export const ActivityModal = ({ activity, onClose, onRefresh }) => {
             }
           />
 
-          <div className="flex items-center justify-between p-2 border rounded bg-gray-50">
-            <label className="font-bold text-gray-700">
+          {/* Bloque de Categoría ordenado y limpio */}
+          <div className="flex flex-col gap-2 p-3 border border-gray-700 rounded bg-gray-800">
+            <label className="font-bold text-gray-200 text-sm">
               {language === "en"
                 ? "Category"
                 : language === "fr"
@@ -142,31 +154,37 @@ export const ActivityModal = ({ activity, onClose, onRefresh }) => {
                     ? "Kategorie"
                     : "Categoría"}
             </label>
-            <select
-              className="p-1 border rounded bg-white border-gray-300 text-gray-800"
-              value={formData.category}
-              onChange={(e) =>
-                setFormData({ ...formData, category: e.target.value })
-              }
-            >
-              {/* Opción por defecto : OPCIONAL */}
-              <option value="">
-                {language === "en"
-                  ? "Select a category"
-                  : language === "fr"
-                    ? "Sélectionner une catégorie"
-                    : language === "de"
-                      ? "Kategorie auswählen"
-                      : "Selecciona una categoría"}
-              </option>
-
-              {/* Mapeo de la lista dinámica */}
-              {listCategories.map((cat) => (
-                <option key={cat.id} value={cat.id}>
-                  {cat.categoryName}
-                </option>
-              ))}
-            </select>
+            <div className="flex gap-2 items-center">
+              <select
+                className="flex-1 p-2 border rounded bg-white border-gray-300 text-gray-800"
+                value={formData.category}
+                onChange={(e) =>
+                  setFormData({ ...formData, category: e.target.value })
+                }
+              >
+                <option value="">...</option>
+                {listCategories.map((cat) => (
+                  <option key={cat.id} value={cat.id}>
+                    {cat.categoryName}
+                  </option>
+                ))}
+              </select>
+              <button
+                type="button"
+                onClick={() => setIsCategoryModalOpen(true)}
+                className="erp-button-normal erp-button-cyan py-2 px-3 text-xs sm:text-sm whitespace-nowrap normal-case"
+              >
+                <span>
+                  {language === "en"
+                    ? "+ New"
+                    : language === "fr"
+                      ? "+ Nouvelle"
+                      : language === "de"
+                        ? "+ Neu"
+                        : "+ Nueva"}
+                </span>
+              </button>
+            </div>
           </div>
 
           <textarea
@@ -272,6 +290,12 @@ export const ActivityModal = ({ activity, onClose, onRefresh }) => {
             </button>
           </div>
         </form>
+        {isCategoryModalOpen && (
+          <NewCategoryModal
+            onClose={() => setIsCategoryModalOpen(false)}
+            onRefresh={() => {}}
+          />
+        )}
       </div>
     </div>
   );

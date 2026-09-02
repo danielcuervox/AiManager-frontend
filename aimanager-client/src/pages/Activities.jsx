@@ -9,19 +9,19 @@ import { DailyTimetable } from "../components/DailyTimetable";
 import { ActivityModal } from "../components/ActivityModal";
 import { WeeklyObjectiveModal } from "../components/WeeklyObjectiveModal";
 import { DailyObjective } from "../components/DailyObjective";
-import { NewCategoryModal } from "../components/NewCategoryModal";
 import { AiManagerModal } from "../components/AiManagerModal";
 import { UserProfile } from "../components/UserProfile";
+import { StatisticsModal } from "../components/StatisticsModal";
 
 export const Activities = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isWeeklyModalOpen, setIsWeeklyModalOpen] = useState(false);
   const [isDailyModalOpen, setIsDailyModalOpen] = useState(false);
-  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [isAiManagerOpen, setIsAiManagerOpen] = useState(false);
   const [editingActivity, setEditingActivity] = useState(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const { language, changeLanguage } = useLanguage();
+  const [isModalStatisticsOpen, setIsModalStatisticsOpen] = useState(false);
 
   // --- AÑADE ESTA FUNCIÓN ---
   const handleRefresh = () => setRefreshTrigger((prev) => prev + 1);
@@ -47,9 +47,9 @@ export const Activities = () => {
     setIsDailyModalOpen(true);
   };
 
-  const handleAddCategory = () => {
-    console.log("Abrir modal de nueva categoría");
-    setIsCategoryModalOpen(true);
+  const handleOpenStatistics = () => {
+    console.log("Abrir modal de estadísticas");
+    setIsModalStatisticsOpen(true);
   };
 
   const handleDelete = async (activityId) => {
@@ -106,7 +106,26 @@ export const Activities = () => {
           <section className="p-6 mb-8 bg-slate-900/60 rounded-xl erp-action-panel shadow-md flex flex-col gap-4">
             {/* Fila superior: avatar a la izquierda - Selector de idiomas alineado a la derecha */}
             <div className="flex flex-wrap items-center justify-between gap-4 bg-gray-800 p-2 rounded-lg border border-gray-700">
+              {/*foto de perfil*/}
               <UserProfile refreshTrigger={refreshTrigger} />
+              {/* imagenes de las estadisticas */}
+
+              <button
+                onClick={handleOpenStatistics}
+                className="erp-button erp-button-green"
+              >
+                <span>📊</span>
+                <span>
+                  {language === "en"
+                    ? "Statistics"
+                    : language === "fr"
+                      ? "Stats"
+                      : language === "de"
+                        ? "Statistiken"
+                        : "Estadísticas"}
+                </span>
+              </button>
+
               {/* Selector de idiomas con Banderas */}
               <div className="flex gap-1.5 items-center">
                 {[
@@ -201,20 +220,7 @@ export const Activities = () => {
                         : "+ Añadir objetivo diario"}
                 </span>
               </button>
-              <button
-                onClick={handleAddCategory}
-                className="erp-button erp-button-cyan"
-              >
-                <span>
-                  {language === "en"
-                    ? "New Category"
-                    : language === "fr"
-                      ? "Nouvelle catégorie"
-                      : language === "de"
-                        ? "Neue Kategorie"
-                        : "Nueva categoría"}
-                </span>
-              </button>
+
               <button
                 onClick={handleGetAiManager}
                 className="erp-button erp-button-cyan"
@@ -280,14 +286,15 @@ export const Activities = () => {
             />
           )}
 
-          {isCategoryModalOpen && (
-            <NewCategoryModal
-              onClose={() => setIsCategoryModalOpen(false)}
-              onRefresh={handleRefresh}
-            />
-          )}
           {isAiManagerOpen && (
             <AiManagerModal onClose={() => setIsAiManagerOpen(false)} />
+          )}
+
+          {isModalStatisticsOpen && (
+            <StatisticsModal
+              onClose={() => setIsModalStatisticsOpen(false)}
+              refreshTrigger={refreshTrigger}
+            />
           )}
         </div>
         <footer className="mt-12 text-center text-xs text-slate-500 font-mono tracking-widest uppercase pb-4">
